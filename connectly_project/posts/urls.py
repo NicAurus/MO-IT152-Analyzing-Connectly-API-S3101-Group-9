@@ -6,4 +6,6 @@ urlpatterns = [
     path('users/create/', views.create_user),
     path('posts/', views.get_posts),
     path('posts/create/', views.create_post),
+    path('comments/', views.get_comments),          
+    path('comments/create/', views.create_comment), 
 ]

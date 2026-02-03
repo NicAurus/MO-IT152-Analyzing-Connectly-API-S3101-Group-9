@@ -1,7 +1,9 @@
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import User, Post
+from .models import User, Post, Comment
+
+
 def get_users(request):
     try:
         users = list(User.objects.values('id', 'username', 'email', 'created_at'))
@@ -51,3 +53,47 @@ def create_post(request):
             return JsonResponse({'error': 'Author not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
+        
+
+def get_comments(request):
+    try:
+        comments = list(Comment.objects.values(
+            'id', 'post', 'author', 'content', 'created_at'
+        ))
+        return JsonResponse(comments, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+        
+
+def get_comments(request):
+    try:
+        comments = list(Comment.objects.values(
+            'id', 'post', 'author', 'content', 'created_at'
+        ))
+        return JsonResponse(comments, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def create_comment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            post = Post.objects.get(id=data['post'])
+            author = User.objects.get(id=data['author'])
+            comment = Comment.objects.create(
+                post=post,
+                author=author,
+                content=data['content']
+            )
+            return JsonResponse(
+                {'id': comment.id, 'message': 'Comment created successfully'},
+                status=201
+            )
+        except Post.DoesNotExist:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'Author not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
